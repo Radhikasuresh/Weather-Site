@@ -1,52 +1,41 @@
-let weather = {
-    apiKey: "60d456863d79ca78a9ede783baafe93d",
-    fetchWeather: function (city) {
-      fetch(
-        "https://api.openweathermap.org/data/2.5/weather?q=" +
-          city +
-          "&units=metric&appid=" +
-          this.apiKey
-      )
-        .then((response) => {
-          if (!response.ok) {
-            alert("No weather found.");
-            throw new Error("No weather found.");
-          }
-          return response.json();
-        })
-        .then((data) => this.displayWeather(data));
-    },
-    displayWeather: function (data) {
-      const { name } = data;
-      const { icon, description } = data.weather[0];
-      const { temp, humidity } = data.main;
-      const { speed } = data.wind;
-      document.querySelector(".city").innerText = "Weather in " + name;
-      document.querySelector(".icon").src =
-        "https://openweathermap.org/img/wn/" + icon + ".png";
-      document.querySelector(".description").innerText = description;
-      document.querySelector(".temp").innerText = temp + "°C";
-      document.querySelector(".humidity").innerText =
-        "Humidity: " + humidity + "%";
-      document.querySelector(".wind").innerText =
-        "Wind speed: " + speed + " km/h";
-      document.querySelector(".weather").classList.remove("loading");
-      document.body.style.backgroundImage =
-        "url('https://source.unsplash.com/1600x900/?" + name + "')";
-    },
-    search: function () {
-      this.fetchWeather(document.querySelector(".search-bar").value);
-    },
-  };
-  
-  document.querySelector(".search button").addEventListener("click", function () {
-    weather.search();
-  });
-  
-  document.querySelector(".search-bar").addEventListener("keyup", function (event) {
-      if (event.key == "Enter") {
-        weather.search();
-      }
-    });
-  
-  weather.fetchWeather("chennai");
+const apiKey = "5c66839cd745c3529300494fa12f7b94";
+const apiUrl =
+  "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+const searchBox = document.querySelector(".search input");
+const searchBtn = document.querySelector(".search button");
+const weatherIcon = document.querySelector(".weather-icon");
+
+async function checkWeather(city) {
+  const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+  if (response.status == 404) {
+    document.querySelector(".error").style.display = "block";
+  } else {
+    var data = await response.json();
+    console.log(data);
+
+    document.querySelector(".city").innerHTML = data.name;
+    document.querySelector(".temp").innerHTML =
+      Math.round(data.main.temp) + "°C";
+    document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+    document.querySelector(".wind").innerHTML = data.wind.speed + "Km/hr";
+
+    if (data.weather[0].main == "Clouds") {
+      weatherIcon.src = "images/clouds.png";
+    } else if (data.weather[0].main == "Clear") {
+      weatherIcon.src = "images/clear.png";
+    } else if (data.weather[0].main == "Rain") {
+      weatherIcon.src = "images/rain.png";
+    } else if (data.weather[0].main == "Drizzle") {
+      weatherIcon.src = "images/drizzle.png";
+    } else if (data.weather[0].main == "Mist") {
+      weatherIcon.src = "images/mist.png";
+    }
+    document.querySelector(".weather").style.display = "block";
+    document.querySelector(".error").style.display = "none";
+  }
+}
+
+searchBtn.addEventListener("click", () => {
+  checkWeather(searchBox.value);
+});
